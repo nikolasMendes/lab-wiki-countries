@@ -1,23 +1,62 @@
-import logo from './logo.svg';
 import './App.css';
+import CountriesList from './components/CountriesList';
+import CountryDetails from './components/CountryDetails';
+import Navbar from './components/Navbar';
+import countries from './countries.json';
+import { useState, useEffect } from 'react';
+import { Route, Routes } from 'react-router-dom';
+import axios from 'axios';
 
 function App() {
+  const [allCountries, setAllCountries] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    setIsLoading(true);
+    async function fetchCountries() {
+      const response = await axios.get(
+        `https://ih-countries-api.herokuapp.com/countries`
+      );
+      setAllCountries(response.data);
+      setIsLoading(false);
+    }
+
+    fetchCountries();
+  }, []);
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <Navbar />
+      {!isLoading && (
+        <div className="container">
+          <div className="row">
+            <div
+              className="col-5"
+              style={{ maxHeight: '90vh', overflow: 'scroll' }}
+            >
+              <div className="list-group">
+                b
+                {allCountries
+                  .map((country) => {
+                    return (
+                      <div key={country.name.official}>
+                        <CountriesList country={country} />
+                      </div>
+                    );
+                  })
+                  .reverse()}
+              </div>
+            </div>
+
+            <Routes>
+              <Route
+                path="/:alpha3"
+                element={<CountryDetails allCountries={allCountries} />}
+              />
+            </Routes>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
